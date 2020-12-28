@@ -1,119 +1,124 @@
-import images from './gallery-items.js';
+import galleryItems from './gallery-items.js';
 
 const refs = {
-  gallery: document.querySelector('.js-gallery'),
-  lightbox: document.querySelector('.js-lightbox'),
-  lightboxOverlay: document.querySelector('.lightbox__overlay'),
-  lightboxImage: document.querySelector('.lightbox__image'),
-  lightboxCloseBtn: document.querySelector('[data-action="close-lightbox"]'),
-};
-
-function createGalleryItem({ preview, original, description }, index) {
-  const galleryItemRef = document.createElement('li');
-  const galleryItemLinkRef = document.createElement('a');
-  const galleryItemLinkImageRef = document.createElement('img');
-
-  galleryItemRef.classList.add('gallery__item');
-
-  galleryItemLinkRef.classList.add('gallery__link');
-  galleryItemLinkRef.href = original;
-
-  galleryItemLinkImageRef.classList.add('gallery__image');
-  galleryItemLinkImageRef.src = preview;
-  galleryItemLinkImageRef.alt = description;
-  galleryItemLinkImageRef.dataset.sourse = original;
-  galleryItemLinkImageRef.dataset.index = index;
-
-  galleryItemLinkRef.appendChild(galleryItemLinkImageRef);
-  galleryItemRef.appendChild(galleryItemLinkRef);
-
-  return galleryItemRef;
+    creatImagesListRootRef: document.querySelector('.gallery'),
+    lightBox: document.querySelector('.lightbox'),
+    largeImage: document.querySelector('.lightbox__image'),
+    closeBtn: document.querySelector('.lightbox__button'),
+    overlay: document.querySelector('.lightbox__overlay'),
 }
 
-const galleryItemsArr = images.map((image, index) =>
-  createGalleryItem(image, index),
-);
+galleryItems.forEach(element => {
+    /* console.log(element); */
+    const listImagesRef = document.createElement(`li`); //создает элемент списка li
+    const linkImagesRef = document.createElement(`a`); //создает элемент a
+    const imagesRef = document.createElement(`img`); //создает элемент списка img
+    imagesRef.insertAdjacentHTML('afterbegin', element);//добавляет элемент в начало списка
+    refs.creatImagesListRootRef.append(listImagesRef);//вставляет узел с элементами li в ul после ('#gallery')
 
-refs.gallery.append(...galleryItemsArr);
+    listImagesRef.classList.add('gallery__item');//добавляет класс
+    
+    listImagesRef.append(linkImagesRef);//вставляет узел с элементами a после li
+    linkImagesRef.classList.add('gallery__link')//добавляет класс
+    linkImagesRef.setAttribute('href', element.original)//добавляет атрибут
 
-const galleryImagesRefs = document.querySelectorAll('.gallery__image');
-const galleryImagesArr = Array.from(galleryImagesRefs);
+    linkImagesRef.append(imagesRef);//вставляет узел с элементами img после a    
+    imagesRef.classList.add('gallery__image')//добавляет класс
+    imagesRef.setAttribute('src', element.preview);//добавляет атрибут
+    imagesRef.setAttribute('alt', element.description);//добавляет атрибут
+    imagesRef.setAttribute('data-source', element.original);//добавляет атрибут  
 
-refs.gallery.addEventListener('click', handleOnGalleryClick);
-refs.lightboxCloseBtn.addEventListener('click', handleOnLightboxCloseBtnClick);
-refs.lightboxOverlay.addEventListener('click', handleOnLightboxOverlayClick);
+ }    
+)
 
-function handleOnGalleryClick(event) {
-  event.preventDefault();
+refs.creatImagesListRootRef.addEventListener('click', onGallaryClick);
+refs.closeBtn.addEventListener('click', closeModal);
+refs.overlay.addEventListener('click', overlayClick);
 
-  if (event.target.nodeName !== 'IMG') {
-    return;
-  }
-
-  openLightbox(event.target);
+function onGallaryClick (event) {
+    event.preventDefault()
+    if (event.target.nodeName !== 'IMG') {
+        return;
+    }
+        
+    const imgRef = event.target;   
+    const largeImageURL = imgRef.dataset.source;
+    const largeImageALT = imgRef.alt;
+    
+    refs.largeImage.src = largeImageURL;   
+    refs.largeImage.alt = largeImageALT;
+    openModal();
 }
 
-function handleOnLightboxCloseBtnClick() {
-  closeLightbox();
+function openModal() {
+    window.addEventListener('keydown', onKeyPress);
+    refs.lightBox.classList.add('is-open');
+}
+  
+function closeModal() {
+    refs.lightBox.classList.remove('is-open');
+    window.removeEventListener('keydown', onKeyPress);
+    refs.largeImage.src = '';
+    refs.largeImage.alt = '';
 }
 
-function handleOnLightboxOverlayClick(event) {
-  if (event.target === event.currentTarget) {
-    closeLightbox();
-  }
+function overlayClick(event) {
+    if (event.currentTarget === event.target) {
+      closeModal();
+    }
 }
 
-function handleKeybordKeyPress(event) {
-  let activeImageIndex = findActiveImageIndex();
-
-  switch (event.code) {
-    case 'ArrowRight':
-      activeImageIndex += 1;
-      changeActiveImage(activeImageIndex);
-      break;
-
-    case 'ArrowLeft':
-      activeImageIndex -= 1;
-      changeActiveImage(activeImageIndex);
-      break;
-
-    case 'Escape':
-      closeLightbox();
-      break;
-
-    default:
-  }
+function onKeyPress(event) {
+    let activeIndex = Number(event.target.dataset.index);
+     
 }
 
-function openLightbox(image) {
-  window.addEventListener('keydown', handleKeybordKeyPress);
 
-  refs.lightbox.classList.add('is-open');
-  refs.lightboxImage.src = image.dataset.sourse;
-  refs.lightboxImage.alt = image.alt;
+
+
+/* 
+function onLightBoxClick (event) {
+    event.preventDefault()    
+    if (event.target.nodeName !== 'IMG') {
+        return;
+    }
+    
+    refs.largeImage.src =largeImageURL;
+    
 }
+creatImagesListRootRef.addEventListener('click', onLightBoxClick) */
 
-function closeLightbox() {
-  window.removeEventListener('keydown', handleKeybordKeyPress);
 
-  refs.lightbox.classList.remove('is-open');
-  refs.lightboxImage.src = '';
-  refs.lightboxImage.alt = '';
+
+
+/* function setLargeImageSRC (url) {
+    largeImage.src = url
+} */
+
+
+/* const refs = {
+    creatImagesListRootRef: document.querySelector('.gallery');
+    listImagesRef: document.createElement(`li`); //создает элемент списка li
+    linkImagesRef = document.createElement(`a`); //создает элемент a 
+    imagesRef: document.createElement(`img`); //создает элемент списка img
 }
+galleryItems.forEach(element => {
+    console.log(element);
+    refs.listImagesRef
+    refs.linkImagesRef
+    refs.imagesRef    
+    imagesRef.insertAdjacentHTML('afterbegin', element);//добавляет элемент в начало списка
+    creatImagesListRootRef.append(listImagesRef);//вставляет узел после ('#gallery')   
+    refs.listImagesRef.append(imagesRef); 
+    imagesRef.classList.add('gallery__image')//добавляет класс
+    imagesRef.setAttribute('src', element.preview);//добавляет атрибут
+    imagesRef.setAttribute('alt', element.description);//добавляет атрибут
+    imagesRef.setAttribute('data-source', element.original);//добавляет атрибут
+    listImagesRef.classList.add('gallery__item');
+} */
 
-function findActiveImageIndex() {
-  const activeImageSourse = refs.lightboxImage.src;
-  const imageToFind = galleryImagesArr.find(
-    image => image.dataset.sourse === activeImageSourse,
-  );
-  const indexToFind = imageToFind.dataset.index;
 
-  return Number(indexToFind);
-}
 
-function changeActiveImage(index) {
-  if (index >= 0 && index <= galleryImagesArr.length - 1) {
-    refs.lightboxImage.src = galleryImagesArr[index].dataset.sourse;
-    refs.lightboxImage.alt = galleryImagesArr[index].alt;
-  }
-}
+/* creatImagesListRootRef.addEventListener('click', onImageClick)
+function onImageClick (event) {
+} */
